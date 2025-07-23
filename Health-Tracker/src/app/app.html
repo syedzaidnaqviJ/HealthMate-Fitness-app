@@ -1,0 +1,50 @@
+<div class="min-h-screen flex flex-col items-center p-4">
+  <header class="flex justify-between items-center w-full max-w-2xl">
+    <h1 class="text-2xl font-bold text-primary">HealthMate</h1>
+    <button (click)="toggleDarkMode()" class="button">
+      Toggle {{ darkMode ? 'Light' : 'Dark' }} Mode
+    </button>
+  </header>
+
+  <section class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl mt-6">
+    <!-- Water Intake -->
+    <div class="bg-white dark:bg-gray-800 rounded shadow p-4">
+      <h2 class="text-lg font-semibold mb-2">💧 Water Intake (liters)</h2>
+      <input [(ngModel)]="waterIntake" type="number" min="0" step="0.1" class="input mb-2"
+        placeholder="Enter water intake">
+      <button class="button w-full" (click)="logWater()">Log Water Intake</button>
+      <p class="mt-2">Today: {{ waterLog }} L</p>
+    </div>
+
+    <!-- Steps -->
+    <div class="bg-white dark:bg-gray-800 rounded shadow p-4">
+      <h2 class="text-lg font-semibold mb-2">👟 Steps</h2>
+      <input [(ngModel)]="steps" type="number" min="0" class="input mb-2" placeholder="Enter steps">
+      <button class="button w-full" (click)="logSteps()">Log Steps</button>
+      <p class="mt-2">Today: {{ stepsLog }} steps</p>
+    </div>
+
+    <!-- Sleep -->
+    <div class="bg-white dark:bg-gray-800 rounded shadow p-4">
+      <h2 class="text-lg font-semibold mb-2">🛌 Sleep (hours)</h2>
+      <input [(ngModel)]="sleep" type="number" min="0" step="0.1" class="input mb-2" placeholder="Enter sleep hours">
+      <button class="button w-full" (click)="logSleep()">Log Sleep</button>
+      <p class="mt-2">Today: {{ sleepLog }} hrs</p>
+    </div>
+
+    <!-- Mood -->
+    <div class="bg-white dark:bg-gray-800 rounded shadow p-4">
+      <h2 class="text-lg font-semibold mb-2">😊 Mood</h2>
+      <select [(ngModel)]="mood" class="input mb-2">
+        <option value="">Select mood</option>
+        <option>😀 Happy</option>
+        <option>😐 Neutral</option>
+        <option>😞 Sad</option>
+      </select>
+      <button class="button w-full" (click)="logMood()">Log Mood</button>
+      <p class="mt-2">Today: {{ moodLog }}</p>
+    </div>
+  </section>
+
+  <footer class="mt-auto text-sm text-gray-500 dark:text-gray-400 pt-4">
+    HealthMate © {{ currentYe

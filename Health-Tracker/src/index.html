@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HealthMate - Personal Wellness Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .glass {
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      transition: background 0.5s ease;
+    }
+
+    .dark .glass {
+      background: rgba(30, 30, 30, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body
+  class="bg-gradient-to-br from-green-100 to-blue-100 dark:from-gray-900 dark:to-black text-gray-900 dark:text-gray-100 min-h-screen flex flex-col items-center justify-start p-4 transition-colors duration-500">
+
+  <header class="flex justify-between items-center w-full max-w-4xl">
+    <h1 class="text-3xl md:text-4xl font-extrabold text-green-600 dark:text-green-400 tracking-tight">HealthMate 🌿</h1>
+    <button id="toggleMode"
+      class="bg-green-500 dark:bg-green-600 text-white rounded-full px-4 py-2 hover:bg-green-600 dark:hover:bg-green-700 transition duration-300 shadow">Toggle
+      Mode</button>
+  </header>
+
+  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl mt-8">
+    <!-- Water Intake -->
+    <div class="glass rounded-xl shadow-xl p-6">
+      <h2 class="text-xl font-semibold mb-3">💧 Water Intake</h2>
+      <input id="waterInput" type="number" min="0" step="0.1" placeholder="Enter liters"
+        class="border border-green-300 rounded px-3 py-2 w-full mb-3 focus:outline-none focus:ring-2 focus:ring-green-400 dark:bg-gray-800 dark:border-green-600 dark:text-white">
+      <button id="logWaterBtn"
+        class="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white rounded px-4 py-2 w-full transition">Log
+        Water</button>
+      <p class="mt-3">Total Today: <span id="waterLog" class="font-bold text-green-600 dark:text-green-300">0</span> L
+      </p>
+      <canvas id="waterChart" class="mt-4"></canvas>
+    </div>
+
+    <!-- Steps -->
+    <div class="glass rounded-xl shadow-xl p-6">
+      <h2 class="text-xl font-semibold mb-3">👟 Steps</h2>
+      <input id="stepsInput" type="number" min="0" placeholder="Enter steps"
+        class="border border-blue-300 rounded px-3 py-2 w-full mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:border-blue-600 dark:text-white">
+      <button id="logStepsBtn"
+        class="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded px-4 py-2 w-full transition">Log
+        Steps</button>
+      <p class="mt-3">Total Today: <span id="stepsLog" class="font-bold text-blue-600 dark:text-blue-300">0</span> steps
+      </p>
+      <canvas id="stepsChart" class="mt-4"></canvas>
+    </div>
+
+    <!-- Sleep -->
+    <div class="glass rounded-xl shadow-xl p-6">
+      <h2 class="text-xl font-semibold mb-3">🛌 Sleep</h2>
+      <input id="sleepInput" type="number" min="0" step="0.1" placeholder="Enter hours"
+        class="border border-purple-300 rounded px-3 py-2 w-full mb-3 focus:outline-none focus:ring-2 focus:ring-purple-400 dark:bg-gray-800 dark:border-purple-600 dark:text-white">
+      <button id="logSleepBtn"
+        class="bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white rounded px-4 py-2 w-full transition">Log
+        Sleep</button>
+      <p class="mt-3">Total Today: <span id="sleepLog" class="font-bold text-purple-600 dark:text-purple-300">0</span>
+        hrs</p>
+      <canvas id="sleepChart" class="mt-4"></canvas>
+    </div>
+  </section>
+
+  <section class="glass rounded-xl shadow-xl p-6 w-full max-w-2xl mt-8">
+    <h2 class="text-xl font-semibold mb-3">😊 Mood</h2>
+    <select id="moodInput"
+      class="border rounded px-3 py-2 w-full mb-3 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:bg-gray-800 dark:border-pink-600 dark:text-white">
+      <option value="">Select mood</option>
+      <option value="😀 Happy">😀 Happy</option>
+      <option value="😐 Neutral">😐 Neutral</option>
+      <option value="😞 Sad">😞 Sad</option>
+    </select>
+    <button id="logMoodBtn"
+      class="bg-pink-500 hover:bg-pink-600 dark:bg-pink-600 dark:hover:bg-pink-700 text-white rounded px-4 py-2 w-full transition">Log
+      Mood</button>
+    <p id="moodDisplay" class="mt-3 text-center font-semibold text-pink-600 dark:text-pink-300">Current Mood: <span
+        id="moodLog">None</span></p>
+  </section>
+
+  <footer class="mt-8 text-sm text-gray-600 dark:text-gray-400">
+    HealthMate © <span id="year"></span> - Track Your Wellness with Comfort
+  </footer>
+
+  <script>
+    // Initialization
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const root = document.documentElement;
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) root.classList.add('dark');
+
+    document.getElementById('toggleMode').addEventListener('click', () => {
+      root.classList.toggle('dark');
+    });
+
+    // Data storage
+    let data = JSON.parse(localStorage.getItem('healthmate') || '{}');
+    data.water = parseFloat(data.water) || 0;
+    data.steps = parseInt(data.steps) || 0;
+    data.sleep = parseFloat(data.sleep) || 0;
+    data.mood = data.mood || 'None';
+
+    document.getElementById('waterLog').textContent = data.water;
+    document.getElementById('stepsLog').textContent = data.steps;
+    document.getElementById('sleepLog').textContent = data.sleep;
+    document.getElementById('moodLog').textContent = data.mood;
+
+    // Charts
+    const waterChart = new Chart(document.getElementById('waterChart').getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: ['Water Intake', 'Remaining'], datasets: [{ data: [data.water, 3 - data.water], backgroundColor: ['#34D399', '#D1FAE5'] }] },
+      options: { plugins: { legend: { display: false } } }
+    });
+    const stepsChart = new Chart(document.getElementById('stepsChart').getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: ['Steps', 'Remaining'], datasets: [{ data: [data.steps, 10000 - data.steps], backgroundColor: ['#60A5FA', '#DBEAFE'] }] },
+      options: { plugins: { legend: { display: false } } }
+    });
+    const sleepChart = new Chart(document.getElementById('sleepChart').getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: ['Sleep', 'Remaining'], datasets: [{ data: [data.sleep, 8 - data.sleep], backgroundColor: ['#A78BFA', '#EDE9FE'] }] },
+      options: { plugins: { legend: { display: false } } }
+    });
+
+    // Save function
+    function save() {
+      localStorage.setItem('healthmate', JSON.stringify(data));
+      waterChart.data.datasets[0].data = [data.water, Math.max(0, 3 - data.water)];
+      stepsChart.data.datasets[0].data = [data.steps, Math.max(0, 10000 - data.steps)];
+      sleepChart.data.datasets[0].data = [data.sleep, Math.max(0, 8 - data.sleep)];
+      waterChart.update();
+      stepsChart.update();
+      sleepChart.update();
+    }
+
+    // Water
+    document.getElementById('logWaterBtn').addEventListener('click', () => {
+      let val = parseFloat(document.getElementById('waterInput').value) || 0;
+      data.water = parseFloat((data.water + val).toFixed(1));
+      document.getElementById('waterLog').textContent = data.water;
+      document.getElementById('waterInput').value = '';
+      save();
+    });
+
+    // Steps
+    document.getElementById('logStepsBtn').addEventListener('click', () => {
+      let val = parseInt(document.getElementById('stepsInput').value) || 0;
+      data.steps += val;
+      document.getElementById('stepsLog').textContent = data.steps;
+      document.getElementById('stepsInput').value = '';
+      save();
+    });
+
+    // Sleep
+    document.getElementById('logSleepBtn').addEventListener('click', () => {
+      let val = parseFloat(document.getElementById('sleepInput').value) || 0;
+      data.sleep = parseFloat((data.sleep + val).toFixed(1));
+      document.getElementById('sleepLog').textContent = data.sleep;
+      document.getElementById('sleepInput').value = '';
+      save();
+    });
+
+    // Mood with unique, captivating messages
+    document.getElementById('logMoodBtn').addEventListener('click', () => {
+      let val = document.getElementById('moodInput').value || 'None';
+      data.mood = val;
+      document.getElementById('moodLog').textContent = val;
+      document.getElementById('moodInput').value = '';
+
+      const messages = {
+        "😀 Happy": "🌟 Stay shining bright, you are on your way to a great day!",
+        "😐 Neutral": "⚖️ Take a deep breath, today can still turn amazing.",
+        "😞 Sad": "💪 It's okay to feel down, tomorrow is a new chance to rise."
+      };
+      document.getElementById('moodDisplay').innerHTML = `<span class="fade-in">${val} - ${messages[val] || 'Log your mood to track your emotional wellness.'}</span>`;
+
+      save();
+    });
+  </script>
+</body>
+
+</html>
